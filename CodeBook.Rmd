@@ -1,0 +1,126 @@
+# Getting and Cleaning Data : Peer Assessment 
+
+## Purpose
+
+You should create one R script called run_analysis.R that does the following.
+
+1. Merges the training and the test sets to create one data set.
+2. Extracts only the measurements on the mean and standard deviation for each measurement. 
+3. Uses descriptive activity names to name the activities in the data set
+4. Appropriately labels the data set with descriptive variable names. 
+5. Creates a second, independent tidy data set with the average of each variable for each activity and each subject. 
+
+1. Merges the training and the test sets to create one data set.
+The source files are from: https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip 
+After extraction, the folder UCI HAR Dataset contains train and test subfolders and other files.
+The working directory is set to UCI HAR Dataset.
+
+```{r}
+setwd("H:/Rproga/UCI HAR Dataset")
+# read initial data sets into temporary ones
+# and check number of records read and columns
+tempds1 <- read.table("train/X_train.txt") # X training set
+tempds2 <- read.table("test/X_test.txt")  # X test set
+nrow(tempds1); ncol(tempds1)
+nrow(tempds2); ncol(tempds2)
+# we  rbind() them into XDS and check the rows and cols
+XDS <- rbind(tempds1, tempds2)
+nrow(XDS); ncol(XDS)
+# All ok, we reapeat for the labels data
+tempds1 <- read.table("train/y_train.txt") # training set labels
+tempds2 <- read.table("test/y_test.txt")  # test set labels
+nrow(tempds1); ncol(tempds1)
+nrow(tempds2); ncol(tempds2)
+# we  rbind() them into LDS and check the rows and cols
+LDS <- rbind(tempds1, tempds2)
+nrow(LDS); ncol(LDS)
+# All ok, we reapeat for the subjects data
+tempds1 <- read.table("train/subject_train.txt") # training set labels
+tempds2 <- read.table("test/subject_test.txt")  # test set labels
+nrow(tempds1); ncol(tempds1)
+nrow(tempds2); ncol(tempds2)
+# we  rbind() them into SDS and check the rows and cols
+SDS <- rbind(tempds1, tempds2)
+nrow(SDS); ncol(SDS)
+```
+
+2. Extracts only the measurements on the mean and standard deviation for each measurement.
+
+```{r}
+setwd("H:/Rproga/UCI HAR Dataset")
+# We read in the features table and look for varibale names with mean() and std()
+# some varibales have Mean in them but we are sticking to what is required in 2. above
+meanstd <- read.table("features.txt")
+select_meanstd <- grep("mean()|std()", meanstd[,2])   # from second column
+head(meanstd, 4)
+nrow(meanstd)
+str(select_meanstd)   # just checking
+# We can now subset XDS 
+XDS <- XDS[,select_meanstd]
+Nmeanstd <- meanstd[select_meanstd,]   #subsetting meanstd
+nrow(Nmeanstd);head(Nmeanstd,10)
+# Check columns in XDS, then give corresponding names
+ncol(XDS)
+names(XDS) <- Nmeanstd[,2]
+# Remove the () from names and convert to lower case
+names(XDS) <-gsub("\\(|\\)", "", tolower(names(XDS)))
+head(XDS,6)
+```
+
+3. Uses descriptive activity names to name the activities in the data set
+
+```{r}
+setwd("H:/Rproga/UCI HAR Dataset")
+# We read in the activities table
+ADS <- read.table("activity_labels.txt")
+# we remove underscore and convert to lower case
+ADS[,2] <- gsub("_", "", tolower((ADS[,2])))
+ADS
+# replace the numbers  by activity labels in LDS
+nrow(LDS)
+for (line in 1:nrow(LDS)){
+  LDS[line,1] <- ADS[LDS[line,1],2]
+}
+nrow(LDS); head(LDS,55)
+# Just give name to the column of LDS
+names(LDS) <- "activity"
+```
+
+4. Appropriately labels the data set with descriptive variable names.
+
+```{r}
+# We name the column of subject data set SDS
+names(SDS) <- "subject"
+# We now join the three data sets
+FinalDS <- cbind(SDS,LDS,XDS)
+head(FinalDS,10)
+# we save it
+write.table(FinalDS, "H:/Rproga/UCI HAR Dataset/FirstTidy.txt", sep="\t")
+```
+
+5. Creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+
+```{r}
+TidyDS <- aggregate(FinalDS[,-c(1,2)], by = list(subject= FinalDS$subject,activity = FinalDS$activity), FUN= "mean")
+nrow(TidyDS)
+head(TidyDS, 10)
+# we save it
+write.table(TidyDS, "H:/Rproga/UCI HAR Dataset/SecondTidy.txt", sep="\t")
+```
+
+
+
+
+
+
+
+
+
+
+
+                  
+
+
+
+
+
