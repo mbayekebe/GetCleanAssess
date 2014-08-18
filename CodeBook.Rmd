@@ -105,7 +105,7 @@ TidyDS <- aggregate(FinalDS[,-c(1,2)], by = list(subject= FinalDS$subject,activi
 nrow(TidyDS)
 head(TidyDS, 10)
 # we save it
-write.table(TidyDS, "H:/Rproga/UCI HAR Dataset/SecondTidy.txt", sep="\t")
+write.table(TidyDS, "H:/Rproga/UCI HAR Dataset/SecondTidy.txt", row.name=FALSE, sep="\t")
 ```
 
 

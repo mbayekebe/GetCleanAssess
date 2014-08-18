@@ -74,7 +74,7 @@ cat("The merge table written to file FirstTidy.txt\n")
 # We create the second tidy data set with the averages
 TidyDS <- aggregate(FinalDS[,-c(1,2)], by = list(subject= FinalDS$subject,activity = FinalDS$activity), FUN= "mean")
 # we save it
-write.table(TidyDS, "H:/Rproga/UCI HAR Dataset/SecondTidy.txt", sep="\t")
+write.table(TidyDS, "H:/Rproga/UCI HAR Dataset/SecondTidy.txt", row.name=FALSE, sep="\t")
 cat("The second independant table written to file SecondTidy.txt\n")
 cat("run_analysis completed!\n")
 
